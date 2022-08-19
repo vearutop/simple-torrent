@@ -45,6 +45,7 @@ type Config struct {
 	EnableSeeding           bool          `yaml:"EnableSeeding"`
 	IncomingPort            int           `yaml:"IncomingPort"`
 	DoneCmd                 string        `yaml:"DoneCmd"`
+	DoneStop                bool          `yaml:"DoneStop"`
 	SeedRatio               float32       `yaml:"SeedRatio"`
 	SeedTime                time.Duration `yaml:"SeedTime"`
 	UploadRate              string        `yaml:"UploadRate"`

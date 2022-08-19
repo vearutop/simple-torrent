@@ -35,7 +35,7 @@ var (
 	ErrMaxConnTasks  = errors.New("Max conncurrent task reached")
 )
 
-//the Engine Cloud Torrent engine, backed by anacrolix/torrent
+// the Engine Cloud Torrent engine, backed by anacrolix/torrent
 type Engine struct {
 	sync.RWMutex // race condition on ts,client
 	taskMutex    sync.Mutex
@@ -98,7 +98,8 @@ func (e *Engine) Configure(c *Config) error {
 	}
 
 	if c.MuteEngineLog {
-		tc.Logger = eglog.Discard
+		tc.Logger = eglog.Logger{}
+		tc.Logger.Handlers = []eglog.Handler{eglog.DiscardHandler}
 	}
 	tc.Debug = c.EngineDebug
 	tc.NoUpload = !c.EnableUpload
@@ -289,6 +290,12 @@ func (e *Engine) torrentEventProcessor(tt *torrent.Torrent, t *Torrent, ih strin
 			}
 			if !t.Done {
 				t.updateTorrentStatus()
+
+				if t.Done && e.config.DoneStop {
+					if err := e.StopTorrent(t.InfoHash); err != nil {
+						log.Println("Failed to stop torrent:", err.Error())
+					}
+				}
 			}
 			if t.Started {
 				e.taskRoutine(t)
@@ -307,7 +314,7 @@ func (e *Engine) torrentEventProcessor(tt *torrent.Torrent, t *Torrent, ih strin
 	}
 }
 
-//GetTorrents just get the local infohash->Torrent map
+// GetTorrents just get the local infohash->Torrent map
 func (e *Engine) GetTorrents() *map[string]*Torrent {
 	return &e.ts
 }
